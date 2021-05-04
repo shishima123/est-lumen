@@ -1,0 +1,46 @@
+FROM php:7.4.7-fpm
+
+RUN apt-get update && apt-get install -y mariadb-client \
+    libz-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libpq-dev \
+    g++ \
+    libicu-dev \
+    libxml2-dev \
+    libgmp-dev\
+    libxslt-dev \
+    git \
+    vim \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libmcrypt-dev \
+    zlib1g-dev \
+    libmagickwand-dev --no-install-recommends \
+    libzip-dev \
+    imagemagick
+
+RUN docker-php-ext-configure intl \
+    && docker-php-ext-install intl \
+    && docker-php-ext-install zip \
+    && docker-php-ext-configure gmp \
+    && docker-php-ext-install gmp \
+    && docker-php-ext-install pdo_mysql \
+    && docker-php-ext-install soap \
+    && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install opcache \
+    && docker-php-ext-install mysqli \
+    && docker-php-ext-install exif \
+    && docker-php-ext-enable exif \
+    && pecl install apcu \
+    && docker-php-ext-enable apcu \
+    && apt-get install -y redis-server \
+    && pecl install imagick \
+	&& docker-php-ext-enable imagick
+
+WORKDIR /var/www
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN composer --version
