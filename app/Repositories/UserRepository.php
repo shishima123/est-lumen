@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Repositories\RepositoryAbstract;
 use App\Models\User;
+use App\Enum\Paginate;
 
 /**
  * Class UserRepository
@@ -25,7 +26,7 @@ class UserRepository extends RepositoryAbstract
     // Get all data
     public function getData()
     {
-        $users = $this->model->paginate();
+        $users = $this->model->paginate(Paginate::PAGINATE);
         return $users;
     }
 }
