@@ -33,7 +33,7 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function create(Request $request)
+    public function store(Request $request)
     {
         $this->validate($request, [
             'name' => 'required',
