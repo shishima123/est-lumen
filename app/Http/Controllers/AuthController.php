@@ -6,9 +6,29 @@ use App\Models\User;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\JWTAuth;
+use App\Repositories\UserRepository;
+
 class AuthController extends Controller
 {
-
+    /**
+     * @var \Tymon\JWTAuth\JWTAuth
+     */
+    protected $jwt;
+    protected $userRepository;
+    /**
+     * Function constructor
+     *
+     * @param UserRepository $userRepository
+     */
+   
+    public function __construct(JWTAuth $jwt, UserRepository $userRepository)
+    {
+        $this->jwt = $jwt;
+        $this->userRepository = $userRepository;
+        $this->middleware('auth:api',['except'=>['login','register']]);
+    }
+   
     public function register(Request $request)
     {
         $this->validate($request,[
@@ -17,39 +37,66 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = new User;
         try{
-            $user->name = $request->input('name');
-            $user->email = $request->input('email');
-            $plainPassword = $request->input('password');
-            $user->password = app('hash')->make($plainPassword);
-            $user->role_id = $request->input('role_id');
-            $user->save();
-            return response()->json(['user'=>$user,'message'=>'Created successfully',200]);
+            $value = [
+                'name'=>$request->input('name'),
+                'email' => $request->input('email'),
+                'password' => app('hash')->make($request->input('password')),
+                'role_id' => $request->input('role_id')
+            ];
+            if($this->userRepository->create($value)){
+                return response()->json(['message'=>'Created successfully',200]);
+            }else{
+                return response()->json(['message'=>'Created fail',200]);
+            }
         }
         catch(\Exception $e){
             return response()->json(['message'=>'Error',400]);
         }
     }
-
+     
     public function login(Request $request)
     {
-        $this->validate($request,[
-            'email' =>'required|string',
-            'password'=>'required'
+        $this->validate($request, [
+            'email'    => 'required|email|max:255',
+            'password' => 'required',
         ]);
 
-        $credentials = $request->only(['email', 'password']);
-        if (!$token = Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        try {
+
+            if (! $token = $this->jwt->attempt($request->only('email', 'password'))) {
+                return response()->json(['user_not_found'], 404);
+            }
+
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+
+            return response()->json(['token_absent' => $e->getMessage()], 500);
+
         }
        
         return response()->json([
-            'user'=>Auth::user(),
-            'role'=>Auth::user()->role->name,
-            'token' => $token,
-            'expires_in' => Auth::factory()->getTTL() * 60
-        ], 200);
-        
+            'user'=> $this->jwt->user(),
+            'token'=>$token,
+            'role'=>$this->jwt->user()->role->name
+        ]);
+    }
+
+    public function me(Request $request)
+    {
+        $user = $this->jwt->User();
+        return response()->json($user,200);
+    }
+
+    public function logout()
+    {
+        $this->jwt->parseToken()->invalidate();
+		return response()->json(['message'=>'Logout successfully'],200);
+    }
+   
+    public function refresh()
+    {
+        return response()->json([
+            'token' => $this->jwt->refresh($this->jwt->getToken())
+        ],200);
     }
 }

@@ -17,15 +17,18 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->group(['prefix' => 'api/'], function () use ($router) {
+$router->group(['prefix' => 'api/auth'], function () use ($router) {
      
     $router->post('login',['uses'=>'AuthController@login']);
     $router->post('register',['uses'=>'AuthController@register']);
-    //$route->delete('logout','[uses'=>'AuthController@logout');
-  
+    $router->get('me',['uses'=>'AuthController@me']);
+    $router->delete('logout',['uses'=>'AuthController@logout']);
+    $router->post('refresh',['uses'=>'AuthController@refresh']);
   });
 // Api for User
 $router->group(['prefix' => 'api'], function () use ($router) {
+    
+
     $router->get('user',  ['uses' => 'UserController@index']);
 
     $router->get('user/{id}', ['uses' => 'UserController@show']);
