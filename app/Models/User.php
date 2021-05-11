@@ -24,7 +24,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     protected $primaryKey = 'id';
     public $timestamps = false;
     protected $fillable = [
-        'name', 'email','role_id','avatar'
+        'name', 'email','role_id'
     ];
 
     /**
@@ -33,7 +33,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $hidden = [
-        'password',
+        'password'
     ];
     public function role(){
         return $this->belongsTo(Role::class,'role_id');
