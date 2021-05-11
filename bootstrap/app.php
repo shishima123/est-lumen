@@ -122,4 +122,5 @@ $app->router->group([
     require __DIR__ . '/../routes/web.php';
 });
 
+
 return $app;

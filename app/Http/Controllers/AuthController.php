@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\JWTAuth;
 use App\Repositories\UserRepository;
-
 class AuthController extends Controller
 {
     /**

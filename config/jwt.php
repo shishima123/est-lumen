@@ -4,22 +4,7 @@ return [
    
     'secret' => env('JWT_SECRET'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | JWT Authentication Keys
-    |--------------------------------------------------------------------------
-    |
-    | What algorithm you are using, will determine whether your tokens are
-    | signed with a random string (defined in `JWT_SECRET`) or using the
-    | following public & private keys.
-    |
-    | Symmetric Algorithms:
-    | HS256, HS384 & HS512 will use `JWT_SECRET`.
-    |
-    | Asymmetric Algorithms:
-    | RS256, RS384 & RS512 / ES256, ES384 & ES512 will use the keys below.
-    |
-    */
+    
     'keys' => [
         /*
         |--------------------------------------------------------------------------
