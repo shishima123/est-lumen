@@ -17,7 +17,15 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
+$router->group(['prefix'=>'api/auth'],function () use ($router){
 
+    $router->post('login',['uses'=>'AuthController@login']);
+    $router->delete('logout',['uses'=>'AuthController@logout']);
+    $router->post('register',['uses'=>'AuthController@register']);
+    $router->get('me',['uses'=>'AuthController@me']);
+    $router->post('refresh',['uses'=>'AuthController@refresh']);
+});
+// Api for User
 $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('user',  ['uses' => 'UserController@index']);
 
@@ -28,4 +36,18 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->delete('user/{id}', ['uses' => 'UserController@delete']);
 
     $router->put('user/{id}', ['uses' => 'UserController@update']);
+});
+
+
+// Api for Team
+$router->group(['prefix' => 'api'], function () use ($router) {
+    $router->get('team',  ['uses' => 'TeamController@index']);
+
+    $router->get('team/{id}',  ['uses' => 'TeamController@show']);
+
+    $router->post('team',  ['uses' => 'TeamController@store']);
+
+    $router->put('team/{id}', ['uses' => 'TeamController@update']);
+
+    $router->delete('team/{id}', ['uses' => 'TeamController@delete']);
 });
