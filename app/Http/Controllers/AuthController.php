@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\JWTAuth;
 use App\Repositories\UserRepository;
 
@@ -34,7 +33,7 @@ class AuthController extends Controller
         $this->validate($request,[
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
-            'password' => 'required',
+            'password' => 'required|confirmed',
         ]);
 
         try{
@@ -67,6 +66,11 @@ class AuthController extends Controller
             if (! $token = $this->jwt->attempt($request->only('email', 'password'))) {
                 return response()->json(['user_not_found'], 404);
             }
+            return response()->json([
+                'user'=> $this->jwt->user(),
+                'token'=>$token,
+                'role'=>$this->jwt->user()->role->name
+            ]);
 
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
 
@@ -74,16 +78,12 @@ class AuthController extends Controller
 
         }
        
-        return response()->json([
-            'user'=> $this->jwt->user(),
-            'token'=>$token,
-            'role'=>$this->jwt->user()->role->name
-        ]);
+       
     }
 
     public function me(Request $request)
     {
-        $user = $this->jwt->User();
+        $user = $this->jwt->user();
         return response()->json($user,200);
     }
 

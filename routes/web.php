@@ -17,25 +17,13 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-<<<<<<< HEAD
-$router->group(['prefix'=>'api/auth'],function () use ($router){
-
-=======
-$router->group(['prefix' => 'api/auth'], function () use ($router) {
-     
->>>>>>> 9c05745 (Fix commit)
+$router->group(['prefix'=>'api/auth'], function () use ($router){
     $router->post('login',['uses'=>'AuthController@login']);
     $router->delete('logout',['uses'=>'AuthController@logout']);
     $router->post('register',['uses'=>'AuthController@register']);
     $router->get('me',['uses'=>'AuthController@me']);
-<<<<<<< HEAD
     $router->post('refresh',['uses'=>'AuthController@refresh']);
 });
-=======
-    $router->delete('logout',['uses'=>'AuthController@logout']);
-    $router->post('refresh',['uses'=>'AuthController@refresh']);
-  });
->>>>>>> 9c05745 (Fix commit)
 // Api for User
 $router->group(['prefix' => 'api'], function () use ($router) {
     
