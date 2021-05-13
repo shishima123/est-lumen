@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Lumen\Auth\Authorizable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\Team;
 
 class User extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject
 {
@@ -19,7 +20,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      *
      * @var array
      */
-    
+
     protected $table = 'users';
     protected $primaryKey = 'id';
     public $timestamps = false;
@@ -35,15 +36,23 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     protected $hidden = [
         'password'
     ];
-    public function role(){
-        return $this->belongsTo(Role::class,'role_id');
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
     }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
+
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class, 'user_team');
     }
 }
