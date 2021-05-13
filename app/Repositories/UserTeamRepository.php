@@ -26,7 +26,6 @@ class UserTeamRepository extends RepositoryAbstract
     // Get all data
     public function getData()
     {
-        $userTeams = $this->model->paginate(Paginate::PAGINATE);
-        return $userTeams;
+        return $userTeams = $this->model->paginate(Paginate::PAGINATE);
     }
 }

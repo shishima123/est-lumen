@@ -36,7 +36,6 @@ class UserTeamController extends Controller
 
     public function store(Request $request)
     {
-        DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
                 'user_id' => 'required',
@@ -60,7 +59,6 @@ class UserTeamController extends Controller
 
     public function update(Request $request, $id)
     {
-        DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
                 'user_id' => 'required',
