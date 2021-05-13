@@ -49,10 +49,8 @@ class UserTeamController extends Controller
             $input = $request->only('user_id', 'team_id', 'role');
             $result = $this->userTeamRepo->create($input);
         } catch (\Exception $e) {
-            DB::rollback();
             return response()->json(['errorMessage' => 'UserTeam Fail Created!']);
         }
-        DB::commit();
 
         return response()->json('UserTeam Successfully Created!');
     }
@@ -73,10 +71,8 @@ class UserTeamController extends Controller
             $input = $request->only('user_id', 'team_id', 'role');
             $result = $this->userTeamRepo->update($input, $id);
         } catch (\Exception $e) {
-            DB::rollback();
             return response()->json(['errorMessage' => 'UserTeam Fail Updated!']);
         }
-        DB::commit();
 
         return response()->json('UserTeam Successfully Updated!');
     }
