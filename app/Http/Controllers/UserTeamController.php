@@ -4,64 +4,89 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Repositories\UserTeamRepository;
+use Illuminate\Support\Facades\DB;
+use Validator;
 
 class UserTeamController extends Controller
 {
     // variable global
-    protected $userteamRepo;
+    protected $userTeamRepo;
     /**
      * Function constructor
      *
      * @param UserTeamRepository $_userteamRepository
      */
     public function __construct(
-        UserTeamRepository $_userteamRepository
+        UserTeamRepository $_userTeamRepository
     ) {
-        $this->userteamRepo = $_userteamRepository;
+        $this->userTeamRepo = $_userTeamRepository;
     }
 
     public function index()
     {
-        $userteams = $this->userteamRepo->getData();
-        return response()->json($userteams);
+        $userTeams = $this->userTeamRepo->getData();
+        return response()->json($userTeams);
     }
 
     public function show($id)
     {
-        $userteam = $this->userteamRepo->findById($id);
-        return response()->json($userteam);
+        $userTeam = $this->userTeamRepo->findById($id);
+        return response()->json($userTeam);
     }
 
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'user_id' => 'required',
-            'team_id' => 'required',
-            'role' => 'required',
-        ]);
-        $input = $request->only('user_id', 'team_id', 'role');
-        $result = $this->userteamRepo->create($input);
+        DB::beginTransaction();
+        try {
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required',
+                'team_id' => 'required',
+                'role' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['message' => $validator->errors()], 401);
+            }
+            $input = $request->only('user_id', 'team_id', 'role');
+            $result = $this->userTeamRepo->create($input);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['errorMessage' => 'UserTeam Fail Created!']);
+        }
+        DB::commit();
 
         return response()->json('UserTeam Successfully Created!');
     }
 
     public function update(Request $request, $id)
     {
-        $this->validate($request, [
-            'user_id' => 'required',
-            'team_id' => 'required',
-            'role' => 'required',
-        ]);
-        $data = $this->userteamRepo->findById($id);
-        $input = $request->only('user_id', 'team_id', 'role');
-        $result = $this->userteamRepo->update($input, $id);
+        DB::beginTransaction();
+        try {
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required',
+                'team_id' => 'required',
+                'role' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['message' => $validator->errors()], 401);
+            }
+            $data = $this->userTeamRepo->findById($id);
+            $input = $request->only('user_id', 'team_id', 'role');
+            $result = $this->userTeamRepo->update($input, $id);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['errorMessage' => 'UserTeam Fail Updated!']);
+        }
+        DB::commit();
+
         return response()->json('UserTeam Successfully Updated!');
     }
 
     public function delete($id)
     {
-        $data = $this->userteamRepo->findById($id);
-        $this->userteamRepo->delete($id);
+        $data = $this->userTeamRepo->findById($id);
+        $this->userTeamRepo->delete($id);
 
         return response()->json('UserTeam Successfully Deleted!');
     }
