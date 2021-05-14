@@ -26,7 +26,6 @@ class UserRepository extends RepositoryAbstract
     // Get all data
     public function getData()
     {
-        $users = $this->model->paginate(Paginate::PAGINATE);
-        return $users;
+        return $this->model->paginate(Paginate::PAGINATE);
     }
 }
