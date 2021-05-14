@@ -47,8 +47,8 @@ class TeamController extends Controller
             $input = $request->only('name');
             $result = $this->teamRepo->create($input);
         } catch (\Exception $e) {
-            Log::error('User Fail Created!', [$e->getMessage()]);
-            return response()->json(['errorMessage' => 'User Fail Created!']);
+            Log::error('Team Fail Created!', [$e->getMessage()]);
+            return response()->json(['errorMessage' => 'Team Fail Created!']);
         }
 
         return response()->json('Team Successfully Created!');
