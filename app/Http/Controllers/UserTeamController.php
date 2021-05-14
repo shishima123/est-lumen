@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\UserTeamRepository;
 use Validator;
+use Illuminate\Support\Facades\Log;
 
 class UserTeamController extends Controller
 {
@@ -13,7 +14,7 @@ class UserTeamController extends Controller
     /**
      * Function constructor
      *
-     * @param UserTeamRepository $_userteamRepository
+     * @param UserTeamRepository $_userTeamRepository
      */
     public function __construct(
         UserTeamRepository $_userTeamRepository
@@ -35,6 +36,7 @@ class UserTeamController extends Controller
 
     public function store(Request $request)
     {
+
         try {
             $validator = Validator::make($request->all(), [
                 'user_id' => 'required',
@@ -48,6 +50,7 @@ class UserTeamController extends Controller
             $input = $request->only('user_id', 'team_id', 'role');
             $result = $this->userTeamRepo->create($input);
         } catch (\Exception $e) {
+            Log::error('UserTeam Fail Created!', [$e->getMessage()]);
             return response()->json(['errorMessage' => 'UserTeam Fail Created!']);
         }
 
