@@ -28,6 +28,13 @@ class UserController extends Controller
         return response()->json($users);
     }
 
+    public function search(Request $request)
+    {
+        $searchData =  $request->get('search');
+        $users = $this->userRepo->search($searchData);
+        return response()->json($users);
+    }
+
     public function show($id)
     {
         $user = $this->userRepo->findById($id);
