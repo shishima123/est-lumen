@@ -29,22 +29,24 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
     $router->get('user',  ['uses' => 'UserController@index']);
 
+    $router->get('user/search', ['uses' => 'UserController@search']);
+
     $router->get('user/{id}', ['uses' => 'UserController@show']);
 
     $router->post('user', ['uses' => 'UserController@store']);
 
-    $router->delete('user/{id}', ['uses' => 'UserController@delete']);
-
     $router->put('user/{id}', ['uses' => 'UserController@update']);
 
-    $router->get('user/search', ['uses' => 'UserController@search']);
+    $router->delete('user/{id}', ['uses' => 'UserController@delete']);
 });
 
 Route::get('/verify/{code}', 'AuthController@verify');
-Route::get('/resend-email/{id}','AuthController@resendEmail');
+Route::get('/resend-email/{id}', 'AuthController@resendEmail');
 // Api for Team
 $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('team',  ['uses' => 'TeamController@index']);
+
+    $router->get('team/search', ['uses' => 'TeamController@search']);
 
     $router->get('team/{id}',  ['uses' => 'TeamController@show']);
 
@@ -53,8 +55,6 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->put('team/{id}', ['uses' => 'TeamController@update']);
 
     $router->delete('team/{id}', ['uses' => 'TeamController@delete']);
-
-    $router->get('team/search', ['uses' => 'TeamController@search']);
 });
 
 
@@ -69,4 +69,20 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->put('userteam/{id}', ['uses' => 'UserTeamController@update']);
 
     $router->delete('userteam/{id}', ['uses' => 'UserTeamController@delete']);
+});
+
+
+// Api for Role
+$router->group(['prefix' => 'api'], function () use ($router) {
+    $router->get('role',  ['uses' => 'RoleController@index']);
+
+    $router->get('role/search', ['uses' => 'RoleController@search']);
+
+    $router->get('role/{id}',  ['uses' => 'RoleController@show']);
+
+    $router->post('role',  ['uses' => 'RoleController@store']);
+
+    $router->put('role/{id}',  ['uses' => 'RoleController@update']);
+
+    $router->delete('role/{id}',  ['uses' => 'RoleController@delete']);
 });
