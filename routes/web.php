@@ -40,7 +40,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('user/search', ['uses' => 'UserController@search']);
 });
 
-
+Route::get('/verify/{code}', 'AuthController@verify');
+Route::get('/resend-email/{id}','AuthController@resendEmail');
 // Api for Team
 $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('team',  ['uses' => 'TeamController@index']);
