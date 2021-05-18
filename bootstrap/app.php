@@ -25,6 +25,9 @@ $app = new Laravel\Lumen\Application(
 
 $app->withFacades();
 $app->withEloquent();
+$app->withFacades(true, [
+    'Illuminate\Support\Facades\Mail' => 'Mail',
+]);
 
 
 
