@@ -51,7 +51,7 @@ class UserTeamController extends Controller
             $result = $this->userTeamRepo->create($input);
         } catch (\Exception $e) {
             Log::error('UserTeam Fail Created!', [$e->getMessage()]);
-            return response()->json(['errorMessage' => 'UserTeam Fail Created!']);
+            return response()->json(['errorMessage' => 'UserTeam Fail Created!'], 400);
         }
 
         return response()->json('UserTeam Successfully Created!');
@@ -73,7 +73,7 @@ class UserTeamController extends Controller
             $input = $request->only('user_id', 'team_id', 'role');
             $result = $this->userTeamRepo->update($input, $id);
         } catch (\Exception $e) {
-            return response()->json(['errorMessage' => 'UserTeam Fail Updated!']);
+            return response()->json(['errorMessage' => 'UserTeam Fail Updated!'], 400);
         }
 
         return response()->json('UserTeam Successfully Updated!');

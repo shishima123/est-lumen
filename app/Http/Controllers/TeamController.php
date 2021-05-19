@@ -55,7 +55,7 @@ class TeamController extends Controller
             $result = $this->teamRepo->create($input);
         } catch (\Exception $e) {
             Log::error('Team Fail Created!', [$e->getMessage()]);
-            return response()->json(['errorMessage' => 'Team Fail Created!']);
+            return response()->json(['errorMessage' => 'Team Fail Created!'], 400);
         }
 
         return response()->json('Team Successfully Created!');
@@ -75,7 +75,7 @@ class TeamController extends Controller
             $result = $this->teamRepo->update($input, $id);
         } catch (\Exception $e) {
             Log::error('Team Fail Updated!', [$e->getMessage()]);
-            return response()->json(['errorMessage' => 'Team Fail Updated!']);
+            return response()->json(['errorMessage' => 'Team Fail Updated!'], 400);
         }
         return response()->json('Team Successfully Updated!');
     }

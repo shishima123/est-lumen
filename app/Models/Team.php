@@ -17,6 +17,8 @@ class Team extends Model
      *
      * @var array
      */
+    protected $table = 'teams';
+    protected $primaryKey = 'id';
     protected $fillable = [
         'name'
     ];
