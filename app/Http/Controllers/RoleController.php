@@ -55,7 +55,7 @@ class RoleController extends Controller
             $result = $this->roleRepo->create($input);
         } catch (\Exception $e) {
             Log::error('Role Fail Created!', [$e->getMessage()]);
-            return response()->json(['errorMessage' => 'Role Fail Created!']);
+            return response()->json(['errorMessage' => 'Role Fail Created!'], 400);
         }
 
         return response()->json('Role Successfully Created!');
@@ -75,7 +75,7 @@ class RoleController extends Controller
             $result = $this->roleRepo->update($input, $id);
         } catch (\Exception $e) {
             Log::error('Role Fail Updated!', [$e->getMessage()]);
-            return response()->json(['errorMessage' => 'Role Fail Updated!']);
+            return response()->json(['errorMessage' => 'Role Fail Updated!'], 400);
         }
         return response()->json('Role Successfully Updated!');
     }

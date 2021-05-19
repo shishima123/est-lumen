@@ -58,7 +58,7 @@ class UserController extends Controller
             $result = $this->userRepo->create($input);
         } catch (\Exception $e) {
             Log::error('User Fail Created!', [$e->getMessage()]);
-            return response()->json(['errorMessage' => 'User Fail Created!']);
+            return response()->json(['errorMessage' => 'User Fail Created!'], 400);
         }
 
         return response()->json('User Successfully Created!');
@@ -81,7 +81,7 @@ class UserController extends Controller
             $result = $this->userRepo->update($input, $id);
         } catch (\Exception $e) {
             Log::error('User Fail Updated!', [$e->getMessage()]);
-            return response()->json(['errorMessage' => 'User Fail Updated!']);
+            return response()->json(['errorMessage' => 'User Fail Updated!'], 400);
         }
 
         return response()->json('User Successfully Updated!');
