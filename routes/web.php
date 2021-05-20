@@ -24,65 +24,70 @@ $router->group(['prefix' => 'api/auth'], function () use ($router) {
     $router->get('me', ['uses' => 'AuthController@me']);
     $router->post('refresh', ['uses' => 'AuthController@refresh']);
 });
-// Api for User
-$router->group(['prefix' => 'api'], function () use ($router) {
-
-    $router->get('user',  ['uses' => 'UserController@index']);
-
-    $router->get('user/search', ['uses' => 'UserController@search']);
-
-    $router->get('user/{id}', ['uses' => 'UserController@show']);
-
-    $router->post('user', ['uses' => 'UserController@store']);
-
-    $router->put('user/{id}', ['uses' => 'UserController@update']);
-
-    $router->delete('user/{id}', ['uses' => 'UserController@delete']);
-});
 
 Route::get('/verify/{code}', 'AuthController@verify');
 Route::get('/resend-email/{id}', 'AuthController@resendEmail');
-// Api for Team
-$router->group(['prefix' => 'api'], function () use ($router) {
-    $router->get('team',  ['uses' => 'TeamController@index']);
-
-    $router->get('team/search', ['uses' => 'TeamController@search']);
-
-    $router->get('team/{id}',  ['uses' => 'TeamController@show']);
-
-    $router->post('team',  ['uses' => 'TeamController@store']);
-
-    $router->put('team/{id}', ['uses' => 'TeamController@update']);
-
-    $router->delete('team/{id}', ['uses' => 'TeamController@delete']);
-});
 
 
-// Api for UserTeam
-$router->group(['prefix' => 'api'], function () use ($router) {
-    $router->get('userteam',  ['uses' => 'UserTeamController@index']);
+$router->group(['prefix' => 'api/auth'], function () use ($router) {
 
-    $router->get('userteam/{id}',  ['uses' => 'UserTeamController@show']);
+    // Api for User
+    $router->group(['prefix' => 'user'], function () use ($router) {
+        $router->get('index',  ['uses' => 'UserController@index']);
 
-    $router->post('userteam',  ['uses' => 'UserTeamController@store']);
+        $router->get('search', ['uses' => 'UserController@search']);
 
-    $router->put('userteam/{id}', ['uses' => 'UserTeamController@update']);
+        $router->get('show/{id}', ['uses' => 'UserController@show']);
 
-    $router->delete('userteam/{id}', ['uses' => 'UserTeamController@delete']);
-});
+        $router->post('store', ['uses' => 'UserController@store']);
+
+        $router->put('update/{id}', ['uses' => 'UserController@update']);
+
+        $router->delete('delete/{id}', ['uses' => 'UserController@delete']);
+    });
 
 
-// Api for Role
-$router->group(['prefix' => 'api'], function () use ($router) {
-    $router->get('role',  ['uses' => 'RoleController@index']);
+    // Api for Team
+    $router->group(['prefix' => 'team'], function () use ($router) {
+        $router->get('index',  ['uses' => 'TeamController@index']);
 
-    $router->get('role/search', ['uses' => 'RoleController@search']);
+        $router->get('search', ['uses' => 'TeamController@search']);
 
-    $router->get('role/{id}',  ['uses' => 'RoleController@show']);
+        $router->get('show/{id}',  ['uses' => 'TeamController@show']);
 
-    $router->post('role',  ['uses' => 'RoleController@store']);
+        $router->post('store',  ['uses' => 'TeamController@store']);
 
-    $router->put('role/{id}',  ['uses' => 'RoleController@update']);
+        $router->put('update/{id}', ['uses' => 'TeamController@update']);
 
-    $router->delete('role/{id}',  ['uses' => 'RoleController@delete']);
+        $router->delete('delete/{id}', ['uses' => 'TeamController@delete']);
+    });
+
+    // Api for UserTeam
+    $router->group(['prefix' => 'userteam'], function () use ($router) {
+        $router->get('index',  ['uses' => 'UserTeamController@index']);
+
+        $router->get('show/{id}',  ['uses' => 'UserTeamController@show']);
+
+        $router->post('store',  ['uses' => 'UserTeamController@store']);
+
+        $router->put('update/{id}', ['uses' => 'UserTeamController@update']);
+
+        $router->delete('delete/{id}', ['uses' => 'UserTeamController@delete']);
+    });
+
+
+    // Api for Role
+    $router->group(['prefix' => 'role'], function () use ($router) {
+        $router->get('index',  ['uses' => 'RoleController@index']);
+
+        $router->get('search', ['uses' => 'RoleController@search']);
+
+        $router->get('show/{id}',  ['uses' => 'RoleController@show']);
+
+        $router->post('store',  ['uses' => 'RoleController@store']);
+
+        $router->put('update/{id}',  ['uses' => 'RoleController@update']);
+
+        $router->delete('delete/{id}',  ['uses' => 'RoleController@delete']);
+    });
 });
