@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Team;
 use App\Models\User;
-
+use App\Enum\RoleUserTeam;
 
 
 class UserTeam extends Model
@@ -35,5 +35,14 @@ class UserTeam extends Model
     public function team()
     {
         return $this->belongsTo(Team::class, 'team_id', 'id');
+    }
+
+    public function isOwnerRole()
+    {
+        return $this->role == RoleUserTeam::OWNER;
+    }
+    public function isMemberRole()
+    {
+        return $this->role ==RoleUserTeam::MEMBER;
     }
 }

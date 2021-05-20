@@ -28,8 +28,7 @@ $router->group(['prefix' => 'api/auth'], function () use ($router) {
 Route::get('/verify/{code}', 'AuthController@verify');
 Route::get('/resend-email/{id}', 'AuthController@resendEmail');
 
-
-$router->group(['prefix' => 'api/auth'], function () use ($router) {
+$router->group(['prefix' => 'api'], function () use ($router) {
 
     // Api for User
     $router->group(['prefix' => 'user'], function () use ($router) {
@@ -72,7 +71,9 @@ $router->group(['prefix' => 'api/auth'], function () use ($router) {
 
         $router->put('update/{id}', ['uses' => 'UserTeamController@update']);
 
-        $router->delete('delete/{id}', ['uses' => 'UserTeamController@delete']);
+        $router->delete('/remove-user', ['uses' => 'UserTeamController@removeUserInTeam']);
+
+        $router->post('change-admin',['uses'=>'UserTeamController@changeAdmin']);
     });
 
 
