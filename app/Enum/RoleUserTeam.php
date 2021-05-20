@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-class Role
+class RoleUserTeam
 {
     const OWNER = 1;
 
