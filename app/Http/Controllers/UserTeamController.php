@@ -113,7 +113,7 @@ class UserTeamController extends Controller
             $role = $request->input('role');
             $auth_id = $this->jwt->user()->id;
 
-            $role_id = 0;
+            $role_id = RoleUserTeam::MEMBER;
             $msg = $this->userTeamRepo->checkPermission($auth_id,$team_id);
 
             if($msg != ''){
@@ -124,9 +124,9 @@ class UserTeamController extends Controller
             $userInTeamId = $this->userTeamRepo->findUserInTeam($user_id,$team_id)->id;
 
             if($role=='admin')
+            {
                 $role_id = RoleUserTeam::ADMIN;
-            if($role=='member')
-                $role_id = RoleUserTeam::MEMBER;
+            }
             $result = $this->userTeamRepo->changeAdmin($userInTeamId,$role_id);
             return response()->json(['message'=>'Change admin successfully']);
         }

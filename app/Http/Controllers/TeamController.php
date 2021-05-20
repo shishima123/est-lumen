@@ -54,6 +54,7 @@ class TeamController extends Controller
 
     public function store(Request $request)
     {
+        DB::beginTransaction();
         try {
             $user_id = $this->jwt->user()->id;
             $validator = Validator::make($request->all(), [
@@ -64,21 +65,22 @@ class TeamController extends Controller
                 return response()->json(['message' => $validator->errors()], 401);
             }
             $input = $request->only('name');
-            $result = $this->teamRepo->create($input);
-            $team_id = $this->teamRepo->findByField('name',$request->input('name'))->first()->id;
+            $team = $this->teamRepo->create($input);
+            $team_id = $team->id;
             $value = [
                 'user_id' => $user_id,
                 'team_id' => $team_id,
                 'role' => RoleUserTeam::OWNER
             ];
             $owner_team = $this->userTeamRepo->create($value);
+            DB::commit();
+            return response()->json('Team Successfully Created!');
 
         } catch (\Exception $e) {
+            DB::rollback();
             Log::error('Team Fail Created!', [$e->getMessage()]);
             return response()->json(['errorMessage' => 'Team Fail Created!'], 400);
         }
-
-        return response()->json('Team Successfully Created!');
     }
 
     public function update(Request $request, $id)
@@ -107,11 +109,12 @@ class TeamController extends Controller
 
     public function delete($id)
     {
+        DB::beginTransaction();
         try{
             $user_id = $this->jwt->user()->id;
             $userInTeam =  $this->userTeamRepo->findUserInTeam($user_id,$id);
             if($userInTeam != null){
-                if( !$userInTeam->isOwerRole() ){
+                if( !$userInTeam->isOwnerRole() ){
                     return response()->json(['message'=>"You don't have permission for that"],400);
                 }
             }
@@ -120,9 +123,11 @@ class TeamController extends Controller
             //del users in team
             $usersInTeam = $this->userTeamRepo->findByField('team_id',$id);
             $this->userTeamRepo->deleteMultiple($usersInTeam);
+            DB::commit();
             return response()->json('Team Successfully Deleted!');
         }
         catch (\Exception $e) {
+            DB::rollback();
             return response()->json(['errorMessage' => 'Delete users in team fail'], 400);
         }
     }

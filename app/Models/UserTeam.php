@@ -37,7 +37,7 @@ class UserTeam extends Model
         return $this->belongsTo(Team::class, 'team_id', 'id');
     }
 
-    public function isOwerRole()
+    public function isOwnerRole()
     {
         return $this->role == RoleUserTeam::OWNER;
     }
