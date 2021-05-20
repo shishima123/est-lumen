@@ -65,7 +65,7 @@ class TeamController extends Controller
             }
             $input = $request->only('name');
             $result = $this->teamRepo->create($input);
-            $team_id = $this->teamRepo->findByField('name',$request->input('name'))[0]->id;
+            $team_id = $this->teamRepo->findByField('name',$request->input('name'))->first()->id;
             $value = [
                 'user_id' => $user_id,
                 'team_id' => $team_id,
@@ -84,7 +84,8 @@ class TeamController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $msg = $this->checkPermission($id);
+            $user_id = $this->jwt->user()->id;
+            $msg = $this->userTeamRepo->checkPermission($user_id,$id);
             if($msg != ''){
                 return response()->json(['message'=>$msg],400);
             }
@@ -106,33 +107,24 @@ class TeamController extends Controller
 
     public function delete($id)
     {
-        $user_id = $this->jwt->user()->id;
-        $userInTeam =  $this->userTeamRepo->findUserInTeam($user_id,$id);
-        if($userInTeam != null){
-            if($userInTeam->role !=RoleUserTeam::OWNER){
-                return response()->json(['message'=>"You don't have permission for that"],400);
+        try{
+            $user_id = $this->jwt->user()->id;
+            $userInTeam =  $this->userTeamRepo->findUserInTeam($user_id,$id);
+            if($userInTeam != null){
+                if( !$userInTeam->isOwerRole() ){
+                    return response()->json(['message'=>"You don't have permission for that"],400);
+                }
             }
+            $data = $this->teamRepo->findById($id);
+            $this->teamRepo->delete($id);
+            //del users in team
+            $usersInTeam = $this->userTeamRepo->findByField('team_id',$id);
+            $this->userTeamRepo->deleteMultiple($usersInTeam);
+            return response()->json('Team Successfully Deleted!');
         }
-        $data = $this->teamRepo->findById($id);
-        $this->teamRepo->delete($id);
-        //del users in team
-        $usersInTeam = $this->userTeamRepo->findByField('team_id',$id);
-        for($i=0;$i<count($usersInTeam)-1;$i++)
-        {
-            $this->userTeamRepo->delete($usersInTeam[$i]->id);
+        catch (\Exception $e) {
+            return response()->json(['errorMessage' => 'Delete users in team fail'], 400);
         }
-        return response()->json('Team Successfully Deleted!');
     }
-    public function checkPermission ($team_id)
-    {
-        $user_id = $this->jwt->user()->id;
-        $userInTeam =  $this->userTeamRepo->findUserInTeam($user_id,$team_id);
-        $msg = '';
-        if($userInTeam != null){
-            if($userInTeam->role ==RoleUserTeam::MEMBER){
-                $msg = "You don't have permission for that" ;
-            }
-        }
-        return $msg;
-    }
+
 }

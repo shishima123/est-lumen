@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\Repositories\RepositoryAbstract;
 use App\Models\UserTeam;
 use App\Enum\Paginate;
-
+use App\Enum\RoleUserTeam;
 /**
  * Class UserTeamRepository
  *
@@ -31,10 +31,27 @@ class UserTeamRepository extends RepositoryAbstract
 
     public function findUserInTeam($user_id,$team_id)
     {
-        return $this->model->where('user_id','=',$user_id)->where('team_id','=',$team_id)->first();
+        return $this->model->where('user_id',$user_id)->where('team_id',$team_id)->first();
     }
     public function changeAdmin($id,$role_id)
     {
-        return $this->model->where('id','=',$id)->update(['role'=>$role_id]);
+        return $this->model->where('id',$id)->update(['role'=>$role_id]);
+    }
+
+    public function checkPermission ($user_id,$team_id)
+    {
+        $userInTeam =  $this->findUserInTeam($user_id,$team_id);
+        $msg = '';
+        if($userInTeam != null){
+            if($userInTeam->isMemberRole()){
+                $msg = "You don't have permission for that" ;
+            }
+        }
+        return $msg;
+    }
+
+    public function deleteMultiple($arrayId)
+    {
+        return $this->model->whereIn('user_id',$arrayId)->delete();
     }
 }
