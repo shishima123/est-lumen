@@ -24,14 +24,14 @@ class AuthController extends Controller
      *
      * @param UserRepository $userRepository
      */
-   
+
     public function __construct(JWTAuth $jwt, UserRepository $userRepository)
     {
         $this->jwt = $jwt;
         $this->userRepository = $userRepository;
-        $this->middleware('auth:api',['except'=>['login','register','verify','resend']]);
+        $this->middleware('auth:api',['except'=>['login','register','verify','resendEmail']]);
     }
-   
+
     public function register(Request $request)
     {
         $this->validate($request,[
@@ -52,7 +52,7 @@ class AuthController extends Controller
             ];
             if($this->userRepository->create($value)){
                 Mail::to($email)->send(new MailVerify($var));
-                return response()->json(['message'=>'Register successfully']);       
+                return response()->json(['message'=>'Register successfully']);
             }else{
                 return response()->json(['message'=>'Created fail',400]);
             }
@@ -61,7 +61,7 @@ class AuthController extends Controller
             return response()->json(['message'=>'Something was wrong',400]);
         }
     }
-     
+
     public function login(Request $request)
     {
         $this->validate($request, [
@@ -97,8 +97,6 @@ class AuthController extends Controller
             return response()->json(['token_expired'], 500);
 
         }
-       
-       
     }
 
     public function me(Request $request)
@@ -112,7 +110,6 @@ class AuthController extends Controller
             return response()->json(['token_expired'], 500);
 
         }
-       
     }
 
     public function logout()
@@ -120,7 +117,7 @@ class AuthController extends Controller
         $this->jwt->parseToken()->invalidate();
 		return response()->json(['message'=>'Logout successfully']);
     }
-   
+
     public function refresh()
     {
         return response()->json([
@@ -143,13 +140,13 @@ class AuthController extends Controller
                 return response()->json([
                     'message' => 'Verified email succesfully',
                 ]);
-            }        
+            }
         }
         return response()->json([
-            'message' => 'Verified email failed', 
+            'message' => 'Verified email failed',
         ],400);
     }
-    
+
     public function resendEmail($id)
     {
         $user = $this->userRepository->findById($id);
@@ -157,10 +154,9 @@ class AuthController extends Controller
         $code = $user->verification_code;
         if($user->is_verified == Verify::VERIFY){
             return response()->json(['message'=>"You've verified email"]);
-        } 
+        }
         Mail::to($email)->send(new MailVerify($code));
         return response()->json(['message'=>'Resend email successfully']);
-          
     }
 
 }
