@@ -9,6 +9,7 @@ use Validator;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\JWTAuth;
 use App\Enum\RoleUserTeam;
+use DB;
 
 class TeamController extends Controller
 {
