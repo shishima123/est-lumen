@@ -36,8 +36,8 @@ class TeamController extends Controller
 
     public function index()
     {
-        $teams = $this->teamRepo->getData();
-        return response()->json($teams);
+        $team = $this->jwt->user()->teams()->get();
+        return response()->json($team);
     }
 
     public function search(Request $request)
@@ -50,7 +50,11 @@ class TeamController extends Controller
     public function show($id)
     {
         $team = $this->teamRepo->findById($id);
-        return response()->json($team);
+        if ($team) {
+            $team->users = $team->users()->get();
+            return response()->json($team);
+        }
+        return response()->json([]);
     }
 
     public function store(Request $request)
@@ -76,7 +80,6 @@ class TeamController extends Controller
             $owner_team = $this->userTeamRepo->create($value);
             DB::commit();
             return response()->json('Team Successfully Created!');
-
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Team Fail Created!', [$e->getMessage()]);
@@ -88,9 +91,9 @@ class TeamController extends Controller
     {
         try {
             $user_id = $this->jwt->user()->id;
-            $msg = $this->userTeamRepo->checkPermission($user_id,$id);
-            if($msg != ''){
-                return response()->json(['message'=>$msg],400);
+            $msg = $this->userTeamRepo->checkPermission($user_id, $id);
+            if ($msg != '') {
+                return response()->json(['message' => $msg], 400);
             }
             $validator = Validator::make($request->all(), [
                 'name' => 'required|unique:teams',
@@ -111,26 +114,24 @@ class TeamController extends Controller
     public function delete($id)
     {
         DB::beginTransaction();
-        try{
+        try {
             $user_id = $this->jwt->user()->id;
-            $userInTeam =  $this->userTeamRepo->findUserInTeam($user_id,$id);
-            if($userInTeam != null){
-                if( !$userInTeam->isOwnerRole() ){
-                    return response()->json(['message'=>"You don't have permission for that"],400);
+            $userInTeam =  $this->userTeamRepo->findUserInTeam($user_id, $id);
+            if ($userInTeam != null) {
+                if (!$userInTeam->isOwnerRole()) {
+                    return response()->json(['message' => "You don't have permission for that"], 400);
                 }
             }
             $data = $this->teamRepo->findById($id);
             $this->teamRepo->delete($id);
             //del users in team
-            $usersInTeam = $this->userTeamRepo->findByField('team_id',$id);
+            $usersInTeam = $this->userTeamRepo->findByField('team_id', $id);
             $this->userTeamRepo->deleteMultiple($usersInTeam);
             DB::commit();
             return response()->json('Team Successfully Deleted!');
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['errorMessage' => 'Delete users in team fail'], 400);
         }
     }
-
 }
