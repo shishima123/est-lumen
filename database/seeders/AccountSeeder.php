@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Enum\Verify;
 use App\Repositories\RoleRepository;
 
-class SampleAccount extends Seeder
+class AccountSeeder extends Seeder
 {
     /**
      * Run the database seeds.
