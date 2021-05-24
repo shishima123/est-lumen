@@ -23,17 +23,13 @@ class RoleRepository extends RepositoryAbstract
         return Role::class;
     }
 
-    // Get all data
-    public function getData()
+    // Get all and search Data
+    public function getData($search)
     {
-        return  $this->model->paginate(Paginate::PAGINATE);
-    }
-
-    public function search($search)
-    {
+        $model = $this->model;
         if ($search != "") {
-            return  $this->model->where('name', 'LIKE', '%' . $search . '%')->get();
+            $model = $model->where('name', 'LIKE', '%' . $search . '%');
         }
-        return [];
+        return $model->paginate(Paginate::PAGINATE);
     }
 }

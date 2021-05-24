@@ -22,16 +22,10 @@ class UserController extends Controller
         $this->userRepo = $_userRepository;
     }
 
-    public function index()
-    {
-        $users = $this->userRepo->getData();
-        return response()->json($users);
-    }
-
-    public function search(Request $request)
+    public function index(Request $request)
     {
         $searchData =  $request->get('search');
-        $users = $this->userRepo->search($searchData);
+        $users = $this->userRepo->getData($searchData);
         return response()->json($users);
     }
 

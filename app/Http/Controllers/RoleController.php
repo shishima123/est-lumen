@@ -22,16 +22,10 @@ class RoleController extends Controller
         $this->roleRepo = $_roleRepository;
     }
 
-    public function index()
-    {
-        $roles = $this->roleRepo->getData();
-        return response()->json($roles);
-    }
-
-    public function search(Request $request)
+    public function index(Request $request)
     {
         $searchData =  $request->get('search');
-        $roles = $this->roleRepo->search($searchData);
+        $roles = $this->roleRepo->getData($searchData);
         return response()->json($roles);
     }
 
