@@ -150,6 +150,9 @@ class AuthController extends Controller
     public function resendEmail($id)
     {
         $user = $this->userRepository->findById($id);
+        if($user == null){
+            return response()->json(['message'=>'User not found'], 400);
+        }
         $email = $user->email;
         $code = $user->verification_code;
         if($user->is_verified == Verify::VERIFY){
