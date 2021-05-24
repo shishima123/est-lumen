@@ -27,6 +27,9 @@ $router->group(['prefix' => 'api/auth'], function () use ($router) {
 
 Route::get('/verify/{code}', 'AuthController@verify');
 Route::get('/resend-email/{id}', 'AuthController@resendEmail');
+Route::post('/forgotPass','AuthController@sendMailForgotPass');
+Route::post('/check-identification-code','AuthController@checkIdentificationCode');
+Route::post('/new-password/{idUser}','AuthController@newPassWord');
 
 $router->group(['prefix' => 'api'], function () use ($router) {
 

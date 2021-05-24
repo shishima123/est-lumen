@@ -11,6 +11,7 @@ use App\Mail\MailVerify;
 use App\Enum\Verify;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use App\Mail\MailForgotPass;
 
 class AuthController extends Controller
 {
@@ -29,7 +30,7 @@ class AuthController extends Controller
     {
         $this->jwt = $jwt;
         $this->userRepository = $userRepository;
-        $this->middleware('auth:api',['except'=>['login','register','verify','resendEmail']]);
+        $this->middleware('auth:api',['except'=>['login','register','verify','resendEmail','sendMailForgotPass']]);
     }
 
     public function register(Request $request)
@@ -159,4 +160,55 @@ class AuthController extends Controller
         return response()->json(['message'=>'Resend email successfully']);
     }
 
+    public function sendMailForgotPass(Request $request)
+    {
+        try{
+            $email = $request->input('email');
+            $findEmail = $this->userRepository->findByField('email',$email)->first();
+            if(!$findEmail)
+            {
+                return response()->json(['message'=>'email does not exists'], 400);
+            }
+            $code = Str::random(6);
+            try{
+                Mail::to($email)->send(new MailForgotPass($code));
+                $value = ['identification_code'=>$code];
+                $this->userRepository->update($value,$findEmail->id);
+                return response()->json(['message'=>'Send mail successfully']);
+            }catch(Exception $e){
+                return response()->json(['message'=>"Send mail failed"],400);
+            }
+        }catch(Exception $e)
+        {
+            return response()->json(['message'=>'Something was wrong'], 400);
+        }
+    }
+    public function checkIdentificationCode (Request $request)
+    {
+        $code = $request->input('code');
+        $findCode = $this->userRepository->findByField('identification_code',$code)->first();
+        if(!$findCode)
+        {
+            return response()->json(['message'=>'Code is not identification'], 400);
+        }
+        $value = ['identification_code'=>''];
+        $this->userRepository->update($value,$findCode->id);
+        return response()->json(['message'=>'Verifiy identification code successfully','idUser'=>$findCode->id]);
+    }
+    public function newPassWord(Request $request,$idUser)
+    {
+        $this->validate($request,[
+            'password' => 'required|confirmed',
+        ]);
+        try{
+            $value =['password' => app('hash')->make($request->input('password'))];
+            if($this->userRepositoty->update($value,$idUser)
+            {
+                return response()->json(['message'=>'Change password successfully');
+            }
+        }catch(Exception $e)
+        {
+            return response()->json(['message'=>'Change password failed'],400);
+        }
+    }
 }
