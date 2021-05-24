@@ -4,10 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Arr;
+use App\Enum\Verify;
 
 class UserSeeder extends Seeder
 {
@@ -18,13 +17,14 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        $roles = Role::all();
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             User::create([
                 'name' => Str::random(10),
                 'email' => Str::random(10) . '@gmail.com',
                 'password' => Hash::make('12345678'),
-                'role_id' => Arr::random($roles->toArray())['id']
+                'role_id' => '2',
+                'is_verified' => Verify::VERIFY,
+                'verification_code' => '',
             ]);
         }
     }

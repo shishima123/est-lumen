@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use App\Models\Role;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class RoleSeeder extends Seeder
 {
@@ -15,10 +15,18 @@ class RoleSeeder extends Seeder
      */
     public function run()
     {
-        for ($i = 0; $i < 10; $i++) {
-            Role::create([
-                'name' => Str::random(7),
-            ]);
-        }
+        $now = Carbon::now();
+        DB::table('roles')->insert([
+            [
+                'name' => 'admin',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'member',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ]);
     }
 }
