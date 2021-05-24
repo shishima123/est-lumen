@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use App\Enum\Verify;
+use Faker;
 
 class UserSeeder extends Seeder
 {
@@ -17,10 +18,11 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
+        $faker = Faker\Factory::create();
         for ($i = 0; $i < 20; $i++) {
             User::create([
-                'name' => Str::random(10),
-                'email' => Str::random(10) . '@gmail.com',
+                'name' => $faker->name,
+                'email' => $faker->unique()->email,
                 'password' => Hash::make('12345678'),
                 'role_id' => '2',
                 'is_verified' => Verify::VERIFY,
