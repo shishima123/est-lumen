@@ -28,12 +28,4 @@ class TeamRepository extends RepositoryAbstract
     {
         return  $this->model->paginate(Paginate::PAGINATE);
     }
-
-    public function search($search)
-    {
-        if ($search != "") {
-            return  $this->model->where('name', 'LIKE', '%' . $search . '%')->get();
-        }
-        return [];
-    }
 }

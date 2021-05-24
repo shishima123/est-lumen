@@ -40,13 +40,6 @@ class TeamController extends Controller
         return response()->json($team);
     }
 
-    public function search(Request $request)
-    {
-        $searchData =  $request->get('search');
-        $teams = $this->teamRepo->search($searchData);
-        return response()->json($teams);
-    }
-
     public function show($id)
     {
         $team = $this->teamRepo->findById($id);
