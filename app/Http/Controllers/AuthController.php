@@ -121,54 +121,82 @@ class AuthController extends Controller
 
     public function logout()
     {
-        $this->jwt->parseToken()->invalidate();
-		return response()->json(['message'=>'Logout successfully']);
+        try{
+            $this->jwt->invalidate($this->jwt->getToken());
+		    return response()->json(['message'=>'Logout successfully']);
+        }
+        catch(\Exception $e)
+        {
+            Log::error('Logout failed: ' . $e->getMessage());
+            return response()->json(['message'=>'Logout failed']);
+        }
     }
 
     public function refresh()
     {
-        return response()->json([
-            'token' => $this->jwt->refresh($this->jwt->getToken())
-        ],200);
+        try{
+            $token = $this->jwt->getToken();
+            return response()->json([
+                'token' => $this->jwt->refresh($token)
+            ]);
+        }
+        catch(\Exception $e)
+        {
+            Log::error('Refresh token failed: ' . $e->getMessage());
+            return response()->json(['message'=>'Refresh token failed']);
+        }
     }
 
     public function verify($code)
     {
-        $user = $this->userRepository->findByField('verification_code',$code);
-        if(count($user) >0)
-        {
-            $value = [
-                'is_verified'=>1,
-                'verification_code'=>''
-            ];
-            $id = $user[0]->id;
-            if($this->userRepository->update($value,$id))
+        try{
+            $user = $this->userRepository->findByField('verification_code',$code);
+            if(count($user) >0)
             {
-                return response()->json([
-                    'message' => 'Verified email succesfully',
-                ]);
+                $value = [
+                    'is_verified'=>1,
+                    'verification_code'=>''
+                ];
+                $id = $user[0]->id;
+                if($this->userRepository->update($value,$id))
+                {
+                    return response()->json([
+                        'message' => 'Verified email succesfully',
+                    ]);
+                }
             }
         }
-        return response()->json([
-            'message' => 'Verified email failed',
-        ],400);
+        catch(\Exception $e)
+        {
+            Log::error('Verify email failed: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Verified email failed',
+                ],400);
+        }
     }
 
     public function resendEmail($id)
     {
-        $user = $this->userRepository->findById($id);
-        if($user == null){
-            return response()->json(['message'=>'User not found'], 400);
-        }
-        $email = $user->email;
-        $code = $user->verification_code;
+        try{
+            $user = $this->userRepository->findById($id);
+            if($user == null){
+                return response()->json(['message'=>'User not found'], 400);
+            }
+            $email = $user->email;
+            $code = $user->verification_code;
 
-        if($user->is_verified == Verify::VERIFY){
-            return response()->json(['message'=>"You've verified email"]);
-        }
+            if($user->is_verified == Verify::VERIFY){
+                return response()->json(['message'=>"You've verified email"]);
+            }
 
-        Mail::to($email)->send(new MailVerify($code));
-        return response()->json(['message'=>'Resend email successfully']);
+            Mail::to($email)->send(new MailVerify($code));
+            return response()->json(['message'=>'Resend email successfully']);
+        }
+        catch(\Exception $e)
+        {
+            Log::error('Resend email failed: ' . $e->getMessage());
+            return response()->json(['message'=>'Resend email failed']);
+        }
     }
 
     public function sendMailForgotPass(Request $request)
@@ -197,21 +225,28 @@ class AuthController extends Controller
 
     public function checkIdentificationCode (Request $request)
     {
-        $this->validate($request,[
-            'code' => 'required|size:6'
-        ]);
+        try{
+            $this->validate($request,[
+                'code' => 'required|size:6'
+            ]);
 
-        $code = $request->input('code');
-        $user = $this->userRepository->findByField('identification_code',$code)->first();
+            $code = $request->input('code');
+            $user = $this->userRepository->findByField('identification_code',$code)->first();
 
-        if(!$user)
-        {
-            return response()->json(['message'=>'Code is not identification'], 400);
+            if(!$user)
+            {
+                return response()->json(['message'=>'Code is not identification'], 400);
+            }
+
+            $value = ['identification_code'=>''];
+            $this->userRepository->update($value,$user->id);
+            return response()->json(['message'=>'Verifiy identification code successfully','idUser'=>$user->id,'email'=>$user->email]);
         }
-
-        $value = ['identification_code'=>''];
-        $this->userRepository->update($value,$user->id);
-        return response()->json(['message'=>'Verifiy identification code successfully','idUser'=>$user->id,'email'=>$user->email]);
+        catch(\Exception $e)
+        {
+            Log::error('Check identification code failed: ' . $e->getMessage());
+            return response()->json(['message'=>'Check identification code failed'], 400);
+        }
     }
 
     public function newPassword(Request $request,$idUser,$email)
