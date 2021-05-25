@@ -27,14 +27,14 @@ class AuthController extends Controller
      * Function constructor
      *
      * @param UserRepository $userRepository
-     * @param RoleRepository $_roleRepository
+     * @param RoleRepository $roleRepository
      */
 
-    public function __construct(JWTAuth $jwt, UserRepository $userRepository, RoleRepository $_roleRepository)
+    public function __construct(JWTAuth $jwt, UserRepository $userRepository, RoleRepository $roleRepository)
     {
         $this->jwt = $jwt;
         $this->userRepository = $userRepository;
-        $this->roleRepository = $_roleRepository;
+        $this->roleRepository = $roleRepository;
         $this->middleware('auth:api',['except'=>['login','register','verify','resendEmail','sendMailForgotPass','checkIdentificationCode','newPassword']]);
     }
 
@@ -158,9 +158,11 @@ class AuthController extends Controller
         $user = $this->userRepository->findById($id);
         $email = $user->email;
         $code = $user->verification_code;
+
         if($user->is_verified == Verify::VERIFY){
             return response()->json(['message'=>"You've verified email"]);
         }
+
         Mail::to($email)->send(new MailVerify($code));
         return response()->json(['message'=>'Resend email successfully']);
     }
@@ -169,68 +171,84 @@ class AuthController extends Controller
     {
         try{
             $email = $request->input('email');
-            $findEmail = $this->userRepository->findByField('email',$email)->first();
-            if(!$findEmail)
+            $user = $this->userRepository->findByField('email',$email)->first();
+
+            if(!$user)
             {
                 return response()->json(['message'=>'email does not exists'], 400);
             }
+
             $code = Str::random(6);
             try{
                 Mail::to($email)->send(new MailForgotPass($code));
                 $value = ['identification_code'=>$code];
-                $this->userRepository->update($value,$findEmail->id);
+                $this->userRepository->update($value,$user->id);
                 return response()->json(['message'=>'Send mail successfully']);
-            }catch(Exception $e){
-                return response()->json(['message'=>"Send mail failed"],400);
             }
-        }catch(Exception $e)
+            catch(\Exception $e){
+                return response()->json(['message'=>$e->getMessage()],400);
+            }
+        }
+        catch(\Exception $e)
         {
-            return response()->json(['message'=>'Something was wrong'], 400);
+            return response()->json(['message'=>$e->getMessage()], 400);
         }
     }
+
     public function checkIdentificationCode (Request $request)
     {
         $this->validate($request,[
             'code' => 'required|size:6'
         ]);
+
         $code = $request->input('code');
-        $findCode = $this->userRepository->findByField('identification_code',$code)->first();
-        if(!$findCode)
+        $user = $this->userRepository->findByField('identification_code',$code)->first();
+
+        if(!$user)
         {
             return response()->json(['message'=>'Code is not identification'], 400);
         }
+
         $value = ['identification_code'=>''];
-        $this->userRepository->update($value,$findCode->id);
-        return response()->json(['message'=>'Verifiy identification code successfully','idUser'=>$findCode->id,'email'=>$findCode->email]);
+        $this->userRepository->update($value,$user->id);
+        return response()->json(['message'=>'Verifiy identification code successfully','idUser'=>$user->id,'email'=>$user->email]);
     }
+
     public function newPassword(Request $request,$idUser,$email)
     {
         $this->validate($request,[
             'password' => 'required|confirmed|min:8',
         ]);
+
         try{
             $value =['password' => app('hash')->make($request->input('password'))];
-            $findEmail = $this->userRepository->findByField('email',$email)->first();
-            if(!$findEmail)
+            $user = $this->userRepository->findByField('email',$email)->first();
+
+            if(!$user)
             {
                 return response()->json(['message'=>'Email does not exists'],400);
             }
-            if($idUser != $findEmail->id)
+
+            if($idUser != $user->id)
             {
                 return response()->json(['message'=>'Unauthorized'], 400);
             }
-            if($findEmail->identification_code !='')
+
+            if($user->identification_code !='')
             {
                 return response()->json(['message'=>'You must have enter your identification code is sent to your email'], 400);
             }
+
             if(!$this->userRepository->update($value,$idUser))
             {
                 return response()->json(['message'=>'Change password failed'],400);
             }
+
             return response()->json(['message'=>'Change password successfully']);
-        }catch(Exception $e)
+        }
+        catch(\Exception $e)
         {
-            return response()->json(['message'=>'Change password failed'],400);
+            return response()->json(['message'=>$e->getMessage()],400);
         }
     }
 }
