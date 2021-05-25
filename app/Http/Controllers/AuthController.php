@@ -13,7 +13,7 @@ use App\Enum\Verify;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Mail\MailForgotPass;
-
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -64,6 +64,7 @@ class AuthController extends Controller
             }
         }
         catch(\Exception $e){
+            Log::error('Register Failed: ' . $e->getMessage());
             return response()->json(['message'=>'Something was wrong',400]);
         }
     }
@@ -179,19 +180,15 @@ class AuthController extends Controller
             }
 
             $code = Str::random(6);
-            try{
                 Mail::to($email)->send(new MailForgotPass($code));
                 $value = ['identification_code'=>$code];
                 $this->userRepository->update($value,$user->id);
                 return response()->json(['message'=>'Send mail successfully']);
-            }
-            catch(\Exception $e){
-                return response()->json(['message'=>$e->getMessage()],400);
-            }
         }
         catch(\Exception $e)
         {
-            return response()->json(['message'=>$e->getMessage()], 400);
+            Log::error('Send Mail Forgot Password Failed: ' . $e->getMessage());
+            return response()->json(['message'=>'Send Mail Forgot Password Failed'], 400);
         }
     }
 
@@ -248,7 +245,8 @@ class AuthController extends Controller
         }
         catch(\Exception $e)
         {
-            return response()->json(['message'=>$e->getMessage()],400);
+            Log::error('Change password Failed: ' . $e->getMessage());
+            return response()->json(['message'=>'Change password Failed'],400);
         }
     }
 }
