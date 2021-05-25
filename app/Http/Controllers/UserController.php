@@ -25,7 +25,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $searchData =  $request->get('search');
-        $users = $this->userRepo->getData($searchData)->load('role');
+        $users = $this->userRepo->getData($searchData);
         return response()->json($users);
     }
 
