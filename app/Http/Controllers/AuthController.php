@@ -57,7 +57,7 @@ class AuthController extends Controller
                 'verification_code' =>$var
             ];
             if($this->userRepository->create($value)){
-                Mail::to($email)->send(new MailVerify($var));
+                //Mail::to($email)->send(new MailVerify($var));
                 return response()->json(['message'=>'Register successfully']);
             }else{
                 return response()->json(['message'=>'Created fail',400]);
@@ -157,6 +157,9 @@ class AuthController extends Controller
     public function resendEmail($id)
     {
         $user = $this->userRepository->findById($id);
+        if($user == null){
+            return response()->json(['message'=>'User not found'], 400);
+        }
         $email = $user->email;
         $code = $user->verification_code;
 
