@@ -32,6 +32,6 @@ class UserRepository extends RepositoryAbstract
             $model = $model->where('name', 'LIKE', '%' . $search . '%')
                 ->orWhere('email', 'LIKE', '%' . $search . '%');
         }
-        return $model->paginate(Paginate::PAGINATE);
+        return $model->with('role')->paginate(Paginate::PAGINATE);
     }
 }
