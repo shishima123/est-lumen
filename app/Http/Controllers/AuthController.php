@@ -57,7 +57,7 @@ class AuthController extends Controller
                 'verification_code' =>$var
             ];
             if($this->userRepository->create($value)){
-                //Mail::to($email)->send(new MailVerify($var));
+                Mail::to($email)->send(new MailVerify($var));
                 return response()->json(['message'=>'Register successfully']);
             }else{
                 return response()->json(['message'=>'Created fail',400]);
