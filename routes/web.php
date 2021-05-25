@@ -27,14 +27,15 @@ $router->group(['prefix' => 'api/auth'], function () use ($router) {
 
 Route::get('/verify/{code}', 'AuthController@verify');
 Route::get('/resend-email/{id}', 'AuthController@resendEmail');
+Route::post('/forgotPass','AuthController@sendMailForgotPass');
+Route::post('/check-identification-code','AuthController@checkIdentificationCode');
+Route::post('/new-password/{idUser}/{email}','AuthController@newPassword');
 
 $router->group(['prefix' => 'api'], function () use ($router) {
 
     // Api for User
     $router->group(['prefix' => 'user'], function () use ($router) {
         $router->get('index',  ['uses' => 'UserController@index']);
-
-        $router->get('search', ['uses' => 'UserController@search']);
 
         $router->get('show/{id}', ['uses' => 'UserController@show']);
 
@@ -49,8 +50,6 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     // Api for Team
     $router->group(['prefix' => 'team'], function () use ($router) {
         $router->get('index',  ['uses' => 'TeamController@index']);
-
-        $router->get('search', ['uses' => 'TeamController@search']);
 
         $router->get('show/{id}',  ['uses' => 'TeamController@show']);
 
@@ -69,19 +68,15 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
         $router->post('store',  ['uses' => 'UserTeamController@store']);
 
-        $router->put('update/{id}', ['uses' => 'UserTeamController@update']);
-
         $router->delete('/remove-user', ['uses' => 'UserTeamController@removeUserInTeam']);
 
-        $router->post('change-admin',['uses'=>'UserTeamController@changeAdmin']);
+        $router->post('change-admin', ['uses' => 'UserTeamController@changeAdmin']);
     });
 
 
     // Api for Role
     $router->group(['prefix' => 'role'], function () use ($router) {
         $router->get('index',  ['uses' => 'RoleController@index']);
-
-        $router->get('search', ['uses' => 'RoleController@search']);
 
         $router->get('show/{id}',  ['uses' => 'RoleController@show']);
 

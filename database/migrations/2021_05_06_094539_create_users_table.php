@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->timestamps();
             $table->foreignId('role_id');
+            $table->string('identification_code')->default('');
         });
     }
 
