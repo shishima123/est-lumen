@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Mail\MailForgotPass;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -121,30 +122,17 @@ class AuthController extends Controller
 
     public function logout()
     {
-        try{
-            $this->jwt->invalidate($this->jwt->getToken());
-		    return response()->json(['message'=>'Logout successfully']);
-        }
-        catch(\Exception $e)
-        {
-            Log::error('Logout failed: ' . $e->getMessage());
-            return response()->json(['message'=>'Logout failed']);
-        }
+        auth()->logout();
+        return response()->json(['message'=>'Logout successfully']);
     }
 
     public function refresh()
     {
-        try{
-            $token = $this->jwt->getToken();
-            return response()->json([
-                'token' => $this->jwt->refresh($token)
-            ]);
-        }
-        catch(\Exception $e)
-        {
-            Log::error('Refresh token failed: ' . $e->getMessage());
-            return response()->json(['message'=>'Refresh token failed']);
-        }
+        return response()->json([
+            'token' => auth()->refresh(),
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60
+        ]);
     }
 
     public function verify($code)
