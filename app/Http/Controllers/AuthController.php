@@ -7,11 +7,13 @@ use App\Models\Role;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\JWTAuth;
 use App\Repositories\UserRepository;
+use App\Repositories\RoleRepository;
 use App\Mail\MailVerify;
 use App\Enum\Verify;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Mail\MailForgotPass;
+
 
 class AuthController extends Controller
 {
@@ -20,16 +22,19 @@ class AuthController extends Controller
      */
     protected $jwt;
     protected $userRepository;
+    protected $roleRepository;
     /**
      * Function constructor
      *
      * @param UserRepository $userRepository
+     * @param RoleRepository $_roleRepository
      */
 
-    public function __construct(JWTAuth $jwt, UserRepository $userRepository)
+    public function __construct(JWTAuth $jwt, UserRepository $userRepository, RoleRepository $_roleRepository)
     {
         $this->jwt = $jwt;
         $this->userRepository = $userRepository;
+        $this->roleRepository = $_roleRepository;
         $this->middleware('auth:api',['except'=>['login','register','verify','resendEmail','sendMailForgotPass','checkIdentificationCode','newPassword']]);
     }
 
@@ -48,7 +53,7 @@ class AuthController extends Controller
                 'name'=>$request->input('name'),
                 'email' => $request->input('email'),
                 'password' => app('hash')->make($request->input('password')),
-                'role_id' => $request->input('role_id'),
+                'role_id' => $this->roleRepository->findByField('name','member')->first()->id,
                 'verification_code' =>$var
             ];
             if($this->userRepository->create($value)){
