@@ -30,7 +30,7 @@ class AuthController extends Controller
     {
         $this->jwt = $jwt;
         $this->userRepository = $userRepository;
-        $this->middleware('auth:api',['except'=>['login','register','verify','resendEmail','sendMailForgotPass']]);
+        $this->middleware('auth:api',['except'=>['login','register','verify','resendEmail','sendMailForgotPass','checkIdentificationCode','newPassword']]);
     }
 
     public function register(Request $request)
@@ -185,6 +185,9 @@ class AuthController extends Controller
     }
     public function checkIdentificationCode (Request $request)
     {
+        $this->validate($request,[
+            'code' => 'required|size:6'
+        ]);
         $code = $request->input('code');
         $findCode = $this->userRepository->findByField('identification_code',$code)->first();
         if(!$findCode)
@@ -193,19 +196,33 @@ class AuthController extends Controller
         }
         $value = ['identification_code'=>''];
         $this->userRepository->update($value,$findCode->id);
-        return response()->json(['message'=>'Verifiy identification code successfully','idUser'=>$findCode->id]);
+        return response()->json(['message'=>'Verifiy identification code successfully','idUser'=>$findCode->id,'email'=>$findCode->email]);
     }
-    public function newPassWord(Request $request,$idUser)
+    public function newPassword(Request $request,$idUser,$email)
     {
         $this->validate($request,[
-            'password' => 'required|confirmed',
+            'password' => 'required|confirmed|min:8',
         ]);
         try{
             $value =['password' => app('hash')->make($request->input('password'))];
-            if($this->userRepositoty->update($value,$idUser)
+            $findEmail = $this->userRepository->findByField('email',$email)->first();
+            if(!$findEmail)
             {
-                return response()->json(['message'=>'Change password successfully');
+                return response()->json(['message'=>'Email does not exists'],400);
             }
+            if($idUser != $findEmail->id)
+            {
+                return response()->json(['message'=>'Unauthorized'], 400);
+            }
+            if($findEmail->identification_code !='')
+            {
+                return response()->json(['message'=>'You must have enter your identification code is sent to your email'], 400);
+            }
+            if(!$this->userRepository->update($value,$idUser))
+            {
+                return response()->json(['message'=>'Change password failed'],400);
+            }
+            return response()->json(['message'=>'Change password successfully']);
         }catch(Exception $e)
         {
             return response()->json(['message'=>'Change password failed'],400);
