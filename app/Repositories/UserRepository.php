@@ -5,7 +5,6 @@ namespace App\Repositories;
 use App\Repositories\RepositoryAbstract;
 use App\Models\User;
 use App\Enum\Paginate;
-use Illuminate\Http\Request;
 
 /**
  * Class UserRepository
@@ -25,13 +24,18 @@ class UserRepository extends RepositoryAbstract
     }
 
     // Get all and search Data
-    public function getData($search)
+    public function getData($search, $perPage)
     {
         $model = $this->model;
         if ($search != "") {
             $model = $model->where('name', 'LIKE', '%' . $search . '%')
                 ->orWhere('email', 'LIKE', '%' . $search . '%');
         }
+
+        if (is_numeric($perPage)) {
+            return $model->with('role')->paginate($perPage);
+        }
+
         return $model->with('role')->paginate(Paginate::PAGINATE);
     }
 }

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\JWTAuth;
 use App\Enum\RoleUserTeam;
 use App\Repositories\UserRepository;
+use App\Enum\Paginate;
 
 class UserTeamController extends Controller
 {
@@ -32,9 +33,10 @@ class UserTeamController extends Controller
         $this->middleware('auth:api');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $userTeams = $this->userTeamRepo->getData();
+        $perPage =  $request->get('per_page', Paginate::PAGINATE);
+        $userTeams = $this->userTeamRepo->getData($perPage);
         return response()->json($userTeams);
     }
 

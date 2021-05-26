@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Repositories\UserRepository;
 use Validator;
 use Illuminate\Support\Facades\Log;
+use App\Enum\Paginate;
 
 class UserController extends Controller
 {
@@ -25,7 +26,8 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $searchData =  $request->get('search');
-        $users = $this->userRepo->getData($searchData);
+        $perPage =  $request->get('per_page', Paginate::PAGINATE);
+        $users = $this->userRepo->getData($searchData, $perPage);
         return response()->json($users);
     }
 
