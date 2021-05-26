@@ -57,12 +57,10 @@ class AuthController extends Controller
                 'role_id' => $this->roleRepository->findByField('name','member')->first()->id,
                 'verification_code' =>$var
             ];
-            if($this->userRepository->create($value)){
-                Mail::to($email)->send(new MailVerify($var));
-                return response()->json(['message'=>'Register successfully']);
-            }else{
-                return response()->json(['message'=>'Created fail',400]);
-            }
+
+            $user = $this->userRepository->create($value);
+            Mail::to($email)->send(new MailVerify($var));
+            return response()->json(['message'=>'Register successfully']);
         }
         catch(\Exception $e){
             Log::error('Register Failed: ' . $e->getMessage());
@@ -153,6 +151,9 @@ class AuthController extends Controller
                     ]);
                 }
             }
+            else{
+                return response()->json(['messsage'=>'Code is unidentification']);
+            }
         }
         catch(\Exception $e)
         {
@@ -195,14 +196,14 @@ class AuthController extends Controller
 
             if(!$user)
             {
-                return response()->json(['message'=>'email does not exists'], 400);
+                return response()->json(['message'=>'Email does not exists'], 400);
             }
 
             $code = Str::random(6);
-                Mail::to($email)->send(new MailForgotPass($code));
-                $value = ['identification_code'=>$code];
-                $this->userRepository->update($value,$user->id);
-                return response()->json(['message'=>'Send mail successfully']);
+            Mail::to($email)->send(new MailForgotPass($code));
+            $value = ['identification_code'=>$code];
+            $result = $this->userRepository->update($value,$user->id);
+            return response()->json(['message'=>'Send mail successfully']);
         }
         catch(\Exception $e)
         {
@@ -227,7 +228,7 @@ class AuthController extends Controller
             }
 
             $value = ['identification_code'=>''];
-            $this->userRepository->update($value,$user->id);
+            $result = $this->userRepository->update($value,$user->id);
             return response()->json(['message'=>'Verifiy identification code successfully','idUser'=>$user->id,'email'=>$user->email]);
         }
         catch(\Exception $e)
