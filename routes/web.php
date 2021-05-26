@@ -30,6 +30,7 @@ Route::get('/resend-email/{id}', 'AuthController@resendEmail');
 Route::post('/forgotPass','AuthController@sendMailForgotPass');
 Route::post('/check-identification-code','AuthController@checkIdentificationCode');
 Route::post('/new-password/{idUser}/{email}','AuthController@newPassword');
+Route::get('sendmail','AuthController@testSendMail');
 
 $router->group(['prefix' => 'api'], function () use ($router) {
 
