@@ -36,7 +36,7 @@ class AuthController extends Controller
         $this->jwt = $jwt;
         $this->userRepository = $userRepository;
         $this->roleRepository = $roleRepository;
-        $this->middleware('auth:api',['except'=>['login','register','verify','resendEmail','sendMailForgotPass','checkIdentificationCode','newPassword','testSendMail']]);
+        $this->middleware('auth:api',['except'=>['login','register','verify','resendEmail','sendMailForgotPass','checkIdentificationCode','newPassword']]);
     }
 
     public function register(Request $request)
@@ -277,16 +277,31 @@ class AuthController extends Controller
         }
     }
 
-    public function testSendMail()
+    public function changePassword(Request $request)
     {
+        $this->validate($request,[
+                'password' => 'required|confirmed|min:8',
+                'oldPassword'=>'required|min:8'
+            ]);
+
         try{
-            $var = Str::random(60);
-            Mail::to('hongngadut99@gmail.com')->send(new MailVerify($var));
-            return response()->json(['message'=>'SUCCESSFULLY']);
-        }catch(\Exception $e)
+
+            if(!app('hash')->check($request->input('oldPassword'), $this->jwt->user()->password))
+            {
+                return response()->json(['message'=>'Old password is incorrect'], 400);
+            }
+
+            $value =[
+                'password' => app('hash')->make($request->input('password'))
+            ];
+
+            $result = $this->userRepository->update($value,$this->jwt->user()->id);
+            return response()->json(['message'=>'Change password successfully']);
+        }
+        catch(\Exception $e)
         {
-            Log::error('Send mail failed'. $e->getMessage());
-            return response()->json(['message'=>'Send mail failed'],400);
+            Log::error('Change password failed'.$e->getMessage());
+            return response()->json(['message'=>'Change password failed']);
         }
     }
 }
