@@ -64,7 +64,7 @@ class AuthController extends Controller
         }
         catch(\Exception $e){
             Log::error('Register Failed: ' . $e->getMessage());
-            return response()->json(['message'=>'Something was wrong',400]);
+            return response()->json(['message'=>'Something was wrong'],400);
         }
     }
 
@@ -78,12 +78,12 @@ class AuthController extends Controller
         try {
 
             if (! $token = $this->jwt->attempt($request->only('email', 'password'))) {
-                return response()->json(['User not found'], 404);
+                return response()->json(['message'=>'User not found'], 404);
             }
             if($this->jwt->user()->is_verified != Verify::VERIFY)
             {
                 $this->jwt->setToken($token)->invalidate();
-                return response()->json(['message'=>'You must verify your account',400]);
+                return response()->json(['message'=>'You must verify your account'],400);
             }
             return response()->json([
                 'user'=> $this->jwt->user(),
@@ -95,12 +95,12 @@ class AuthController extends Controller
 
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
 
-            return response()->json(['token absent' => $e->getMessage()], 500);
+            return response()->json(['message'=>'token absent' => $e->getMessage()], 500);
 
         }
         catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
 
-            return response()->json(['token_expired'], 500);
+            return response()->json(['message'=>'token_expired'], 500);
 
         }
     }
@@ -113,7 +113,7 @@ class AuthController extends Controller
         }
         catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
 
-            return response()->json(['token_expired'], 500);
+            return response()->json(['message'=>'token_expired'], 500);
 
         }
     }
@@ -184,7 +184,7 @@ class AuthController extends Controller
         catch(\Exception $e)
         {
             Log::error('Resend email failed: ' . $e->getMessage());
-            return response()->json(['message'=>'Resend email failed']);
+            return response()->json(['message'=>'Resend email failed'],400);
         }
     }
 
@@ -301,7 +301,7 @@ class AuthController extends Controller
         catch(\Exception $e)
         {
             Log::error('Change password failed'.$e->getMessage());
-            return response()->json(['message'=>'Change password failed']);
+            return response()->json(['message'=>'Change password failed'],400);
         }
     }
 }
