@@ -32,7 +32,7 @@ Route::post('/forgotPass','AuthController@sendMailForgotPass');
 Route::post('/check-identification-code','AuthController@checkIdentificationCode');
 Route::post('/new-password/{idUser}/{email}','AuthController@newPassword');
 
-$router->group(['prefix' => 'api'], function () use ($router) {
+$router->group(['prefix' => 'api','middleware'=>'auth:api'], function () use ($router) {
 
     // Api for User
     $router->group(['prefix' => 'user'], function () use ($router) {
