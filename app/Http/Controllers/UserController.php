@@ -7,10 +7,15 @@ use App\Repositories\UserRepository;
 use Validator;
 use Illuminate\Support\Facades\Log;
 use App\Enum\Paginate;
+use Tymon\JWTAuth\JWTAuth;
 
 class UserController extends Controller
 {
     // variable global
+    /**
+     * @var \Tymon\JWTAuth\JWTAuth
+     */
+    protected $jwt;
     protected $userRepo;
     /**
      * Function constructor
@@ -18,9 +23,12 @@ class UserController extends Controller
      * @param UserRepository $_userRepository
      */
     public function __construct(
-        UserRepository $_userRepository
+        UserRepository $_userRepository,
+        JWTAuth $_jwt
     ) {
         $this->userRepo = $_userRepository;
+        $this->jwt = $_jwt;
+        $this->middleware('auth:api');
     }
 
     public function index(Request $request)
@@ -37,57 +45,66 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function store(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required',
-                'email' => 'required|email|unique:users',
-                'password' => 'required|min:8',
-                'role_id' => 'required',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json(['message' => $validator->errors()], 401);
-            }
-            $input = $request->only('name', 'email', 'password', 'role_id');
-            $result = $this->userRepo->create($input);
-        } catch (\Exception $e) {
-            Log::error('User Fail Created!', [$e->getMessage()]);
-            return response()->json(['errorMessage' => 'User Fail Created!'], 400);
-        }
-
-        return response()->json('User Successfully Created!');
-    }
-
     public function update(Request $request, $id)
     {
         try {
-            $validator = Validator::make($request->all(), [
+            $auth = $this->jwt->user();
+            if($auth->role->name == 'admin')
+            {
+                $validator = Validator::make($request->all(), [
                 'name' => 'required',
                 'password' => 'required|min:8',
                 'role_id' => 'required',
-            ]);
+                ]);
 
-            if ($validator->fails()) {
-                return response()->json(['message' => $validator->errors()], 401);
+                if ($validator->fails()) {
+                    return response()->json(['message' => $validator->errors()], 401);
+                }
+
+                $input = $request->only('name', 'password', 'role_id');
+                $result = $this->userRepo->update($input, $id);
+
+                return response()->json('User Successfully Updated!');
             }
-            $data = $this->userRepo->findById($id);
-            $input = $request->only('name', 'password', 'role_id');
-            $result = $this->userRepo->update($input, $id);
+            if($auth->id == $id)
+            {
+                $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'password' => 'required|min:8',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json(['message' => $validator->errors()], 401);
+                }
+
+                $input = $request->only('name', 'password');
+                $result = $this->userRepo->update($input, $id);
+
+                return response()->json('User Successfully Updated!');
+            }
+            return response()->json(['message'=>'You dont have permission for action'], 400);
+
         } catch (\Exception $e) {
             Log::error('User Fail Updated!', [$e->getMessage()]);
             return response()->json(['errorMessage' => 'User Fail Updated!'], 400);
         }
-
-        return response()->json('User Successfully Updated!');
     }
 
     public function delete($id)
     {
-        $data = $this->userRepo->findById($id);
-        $this->userRepo->delete($id);
+        try{
+            if($this->jwt->user()->roles->name != 'admin'){
+                return response()->json(['message'=>'You dont have permission for action'], 400);
+            }
+            $data = $this->userRepo->findById($id);
+            $this->userRepo->delete($id);
 
-        return response()->json('User Successfully Deleted!');
+            return response()->json('User Successfully Deleted!');
+        }
+        catch(\Exception $e)
+        {
+            Log::error('Delete user failed '.$e->getMessage());
+            return response()->json(['message'=>'Delete user failed'], 400);
+        }
     }
 }
