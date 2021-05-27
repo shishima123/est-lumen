@@ -14,8 +14,8 @@ class AddVerifiedColumn extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-           $table->string('verification_code')->nullable();
-           $table->integer('is_verified')->default('0');
+            $table->string('verification_code')->nullable();
+            $table->integer('is_verified')->default('0');
         });
     }
 
@@ -26,6 +26,9 @@ class AddVerifiedColumn extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('verification_code');
+            $table->dropColumn('is_verified');
+        });
     }
 }
