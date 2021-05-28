@@ -44,7 +44,7 @@ class AuthController extends Controller
         $this->validate($request,[
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed',
+            'password' => 'required|confirmed|min:8',
         ]);
 
         try{
@@ -83,7 +83,7 @@ class AuthController extends Controller
             if($this->jwt->user()->is_verified != Verify::VERIFY)
             {
                 $this->jwt->setToken($token)->invalidate();
-                return response()->json(['message'=>'You must verify your account'],400);
+                return response()->json(['message'=>'You must verify your account before'],400);
             }
             return response()->json([
                 'user'=> $this->jwt->user(),

@@ -51,22 +51,34 @@ class UserTeamController extends Controller
 
         try {
             $validator = Validator::make($request->all(), [
-                'user_id' => 'required',
-                'team_id' => 'required',
-                'role' => 'required',
+                'email' => 'required|email',
+                'team_id'=>'required'
             ]);
 
             if ($validator->fails()) {
                 return response()->json(['message' => $validator->errors()], 401);
             }
 
+            $user = $this->userRepo->findByField('email',$request->input('email'))->first();
+            if(!$user)
+            {
+                return response()->json(['message'=>'User not found'], 400);
+            }
+
             $auth_id = $this->jwt->user()->id;
-            $team_id = $request->input('team_id');
+            $team_id = $request->get('team_id');
             $msg = $this->userTeamRepo->checkPermission($auth_id, $team_id);
+
             if ($msg != '') {
                 return response()->json(['message' => $msg], 400);
             }
-            $input = $request->only('user_id', 'team_id', 'role');
+
+            $input = [
+                'user_id'=>$user->id,
+                'team_id'=>$team_id,
+                'role'=>RoleUserTeam::MEMBER
+            ];
+
             $result = $this->userTeamRepo->create($input);
             return response()->json('UserTeam Successfully Created!');
         } catch (\Exception $e) {
@@ -78,19 +90,19 @@ class UserTeamController extends Controller
     public function changeAdmin(Request $request)
     {
         try {
+
             $validator = Validator::make($request->all(), [
-                'email' => 'required',
-                'team_id' => 'required',
-                'role' => 'required',
+                'user_id' => 'required',
+                'team_id'=> 'required'
             ]);
 
             if ($validator->fails()) {
                 return response()->json(['message' => $validator->errors()], 401);
             }
 
-            $email = $request->input('email');
-            $team_id = $request->input('team_id');
-            $role = $request->input('role');
+            $user_id = $request->get('user_id');
+            $team_id = $request->get('team_id');
+            $role = $request->get('role');
             $auth_id = $this->jwt->user()->id;
 
             $role_id = RoleUserTeam::MEMBER;
@@ -100,32 +112,38 @@ class UserTeamController extends Controller
                 return response()->json(['message' => $msg], 400);
             }
 
-            $user_id = $this->userRepo->findByField('email', $email)[0]->id;
-            $userInTeamId = $this->userTeamRepo->findUserInTeam($user_id, $team_id)->id;
+            $userInTeam = $this->userTeamRepo->findUserInTeam($user_id, $team_id);
+            if(!$userInTeam)
+            {
+                return response()->json(['message'=>'User not in team'], 400);
+            }
 
-            if ($role == 'admin') {
+            if ($role == RoleUserTeam::ADMIN) {
                 $role_id = RoleUserTeam::ADMIN;
             }
-            $result = $this->userTeamRepo->changeAdmin($userInTeamId, $role_id);
+            $result = $this->userTeamRepo->changeAdmin($userInTeam->id, $role_id);
             return response()->json(['message' => 'Change admin successfully']);
         } catch (\Exception $e) {
-            return response()->json(['errorMessage' => 'Change admin fail'], 400);
+             Log::error('Change admin failed', [$e->getMessage()]);
+            return response()->json(['errorMessage' => 'Change admin failed'], 400);
         }
     }
 
     public function removeUserInTeam(Request $request)
     {
         try {
+
             $validator = Validator::make($request->all(), [
-                'email' => 'required',
-                'team_id' => 'required',
+                'user_id' => 'required',
+                'team_id'=> 'required'
             ]);
 
             if ($validator->fails()) {
                 return response()->json(['message' => $validator->errors()], 401);
             }
-            $email = $request->input('email');
-            $team_id = $request->input('team_id');
+
+            $user_id = $request->get('user_id');
+            $team_id = $request->get('team_id');
             $auth_id = $this->jwt->user()->id;
 
             $msg = $this->userTeamRepo->checkPermission($auth_id, $team_id);
@@ -133,9 +151,23 @@ class UserTeamController extends Controller
                 return response()->json(['message' => $msg], 400);
             }
 
-            $user_id = $this->userRepo->findByField('email', $email)[0]->id;
-            $userInTeamId = $this->userTeamRepo->findUserInTeam($user_id, $team_id)->id;
-            $this->userTeamRepo->delete($userInTeamId);
+            if($auth_id == $user_id)
+            {
+                return response()->json(['message'=>'You could not do this'], 400);
+            }
+
+            $userInTeam = $this->userTeamRepo->findUserInTeam($user_id, $team_id);
+            if(!$userInTeam)
+            {
+                return response()->json(['message'=>'User not in team'], 400);
+            }
+
+            if($userInTeam->role == RoleUserTeam::OWNER)
+            {
+                return response()->json(['message'=>'You can not delete owner team'], 400);
+            }
+
+            $this->userTeamRepo->delete($userInTeam->id);
             return response()->json(['message' => 'Delete user in team successfully']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Delete user in team fail'], 400);
