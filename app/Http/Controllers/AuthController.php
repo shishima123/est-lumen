@@ -95,7 +95,7 @@ class AuthController extends Controller
 
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
 
-            return response()->json(['message'=>'token absent' => $e->getMessage()], 500);
+            return response()->json(['message'=>'token absent'.$e->getMessage()], 500);
 
         }
         catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
