@@ -83,7 +83,7 @@ class UserController extends Controller
     public function delete($id)
     {
         try{
-            if($this->jwt->user()->roles->name != RoleUser::ADMIN){
+            if($this->jwt->user()->role->name != RoleUser::ADMIN){
                 return response()->json(['message'=>'You dont have permission for action'], 400);
             }
             if($this->jwt->user()->id == $id)

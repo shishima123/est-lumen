@@ -111,17 +111,23 @@ class TeamController extends Controller
             $user_id = $this->jwt->user()->id;
             $userInTeam =  $this->userTeamRepo->findUserInTeam($user_id, $id);
             if ($userInTeam != null) {
+
                 if (!$userInTeam->isOwnerRole()) {
                     return response()->json(['message' => "You don't have permission for that"], 400);
                 }
+
+                $data = $this->teamRepo->findById($id);
+                $this->teamRepo->delete($id);
+                //del users in team
+                $usersInTeam = $this->userTeamRepo->findByField('team_id', $id);
+                $this->userTeamRepo->deleteMultiple($usersInTeam);
+                DB::commit();
+                return response()->json('Team Successfully Deleted!');
             }
-            $data = $this->teamRepo->findById($id);
-            $this->teamRepo->delete($id);
-            //del users in team
-            $usersInTeam = $this->userTeamRepo->findByField('team_id', $id);
-            $this->userTeamRepo->deleteMultiple($usersInTeam);
-            DB::commit();
-            return response()->json('Team Successfully Deleted!');
+
+            else{
+                return response()->json(['message'=>'You are not in team'], 400);
+            }
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['errorMessage' => 'Delete users in team fail'], 400);

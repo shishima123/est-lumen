@@ -52,6 +52,9 @@ class UserTeamRepository extends RepositoryAbstract
                 $msg = "You don't have permission for that";
             }
         }
+        else{
+            $msg = "You are not in team";
+        }
         return $msg;
     }
 

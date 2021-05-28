@@ -67,6 +67,13 @@ class UserTeamController extends Controller
 
             $auth_id = $this->jwt->user()->id;
             $team_id = $request->get('team_id');
+            $userInTeam = $this->userTeamRepo->findUserInTeam($user->id, $team_id);
+
+            if($userInTeam)
+            {
+                return response()->json(['message'=>'User is in team'], 400);
+            }
+
             $msg = $this->userTeamRepo->checkPermission($auth_id, $team_id);
 
             if ($msg != '') {
