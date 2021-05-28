@@ -52,6 +52,7 @@ class UserTeamController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'email' => 'required|email',
+                'team_id'=>'required'
             ]);
 
             if ($validator->fails()) {
@@ -66,10 +67,6 @@ class UserTeamController extends Controller
 
             $auth_id = $this->jwt->user()->id;
             $team_id = $request->get('team_id');
-            if($team_id == '')
-            {
-                return response()->json(['message'=>'Bad parameter'], 400);
-            }
             $msg = $this->userTeamRepo->checkPermission($auth_id, $team_id);
 
             if ($msg != '') {
@@ -94,6 +91,15 @@ class UserTeamController extends Controller
     {
         try {
 
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required',
+                'team_id'=> 'required'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['message' => $validator->errors()], 401);
+            }
+
             $user_id = $request->get('user_id');
             $team_id = $request->get('team_id');
             $role = $request->get('role');
@@ -106,17 +112,13 @@ class UserTeamController extends Controller
                 return response()->json(['message' => $msg], 400);
             }
 
-            if($user_id == '' || $team_id == '')
-            {
-                return response()->json(['message'=>'Bad parameter'], 400);
-            }
             $userInTeam = $this->userTeamRepo->findUserInTeam($user_id, $team_id);
             if(!$userInTeam)
             {
                 return response()->json(['message'=>'User not in team'], 400);
             }
 
-            if ($role == RoleUserTeam::ADMINTEXT) {
+            if ($role == RoleUserTeam::ADMIN) {
                 $role_id = RoleUserTeam::ADMIN;
             }
             $result = $this->userTeamRepo->changeAdmin($userInTeam->id, $role_id);
@@ -131,6 +133,15 @@ class UserTeamController extends Controller
     {
         try {
 
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required',
+                'team_id'=> 'required'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['message' => $validator->errors()], 401);
+            }
+
             $user_id = $request->get('user_id');
             $team_id = $request->get('team_id');
             $auth_id = $this->jwt->user()->id;
@@ -138,11 +149,6 @@ class UserTeamController extends Controller
             $msg = $this->userTeamRepo->checkPermission($auth_id, $team_id);
             if ($msg != '') {
                 return response()->json(['message' => $msg], 400);
-            }
-
-            if($user_id == '' || $team_id == '')
-            {
-                return response()->json(['message'=>'Bad parameter'], 400);
             }
 
             if($auth_id == $user_id)

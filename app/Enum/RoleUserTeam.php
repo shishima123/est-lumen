@@ -9,5 +9,4 @@ class RoleUserTeam
     const ADMIN = 2;
 
     const MEMBER = 3;
-    const ADMINTEXT = "admin";
 }
